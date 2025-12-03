@@ -100,7 +100,7 @@ def save_official_youbike():
         print("抓取官方資料失敗:", e)
         return [], None
 def load_official_youbike():
-    latest_file="kaohsiung_official_1764749435.json"
+    latest_file="./kaohsiung_official_1764749435.json"
     try:
         with open(latest_file, "r", encoding="utf-8") as f:
             data = json.load(f)
