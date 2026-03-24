@@ -7,9 +7,6 @@ from math import radians, cos, sin, asin, sqrt
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from db_manager import DBManager # <-- 新增: 引入資料庫管理器
-
-"""爬蟲"""
-
 # -------------------------
 # 擷取資料內retVal中的sno,data
 # -------------------------
@@ -87,8 +84,6 @@ def save_official_youbike(db_manager: DBManager):
         official_data_raw = resp.json()
         official_data = official_data_raw["data"]["data"]["retVal"]
 
-        # ⚠️ 移除寫入 JSON 檔案的程式碼
-
         print(f"官方 JSON 已抓取, 站點數量: {len(official_data)}")
         # 回傳站點列表和一個虛擬的檔案名 (或 None) 以保持簽名一致性
         return official_data, None 
@@ -122,15 +117,13 @@ def filter_against_official(local_stations, official_stations):
     """
     篩選自抓站點存在官方的站點，並回傳結果，不再存成 JSON 檔案。
     """
-    #官方站點s
+    #官方站點
     official_station_nos = {item.get("sno") for item in official_stations}
     #只擷取與官方站點相同的
     filtered = [
         s for s in local_stations if s.get("station_no") in official_station_nos
     ]
     
-    # ⚠️ 移除寫入 JSON 檔案的程式碼
-
     print(f"篩選完成，總站點數: {len(filtered)}")
     # 回傳篩選後的站點列表和虛擬檔案名
     return filtered, None
@@ -202,17 +195,13 @@ class Youbike_API:
         }
         return result
 
-    # 為了 app.py 中的 /upload 路由能調用，提供一個處理原始資料的方法
     def process_raw_data(self, raw_json):
         """處理 app.py /upload 傳入的原始資料，並轉換格式。"""
-        # 由於 /upload 路由的原始資料格式不明，這裡假設它是您 YouBike_API 抓到的格式
-        # 如果格式不同，此處需調整
         return self._convert_youbike_full(raw_json)
 
 
 
 if __name__ == "__main__":
-    # 假設 DB_CONFIG 已在某處定義
     DB_CONFIG_STANDALONE = {
         "user": "USER",
         "password": "PASSWORD", 
