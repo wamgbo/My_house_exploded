@@ -6,10 +6,10 @@ import getpass
 
 # ⚠️ **請根據您的環境修改這些連線設定** 
 DB_CONFIG = {
-    "user": "yeet",
-    "password": "password", 
-    "host": "127.0.0.1",
-    "database": "youbike_data",
+    "user": "USER",
+    "password": "PASSWORD", 
+    "host": "IPADDRESS",
+    "database": "DATABASE",
 }
 
 # 資料表定義
