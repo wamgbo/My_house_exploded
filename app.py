@@ -19,11 +19,11 @@ import jwt
 # 為了單一檔案展示，我將其暫時放在這裡，實際應用中建議獨立檔案
 
 DB_CONFIG = {
-    "user": "root",
-    "password": "csie",
-    "host": "192.168.0.19",
-    "database": "ubyone",
-    "port": "8787",
+    "user": "USER_NAME",
+    "password": "PASSWORD",
+    "host": "IP_ADDRESS",
+    "database": "DATABASE",
+    "port": "PORT",
 }
 # -------------------------
 #           log
