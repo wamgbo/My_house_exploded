@@ -15,7 +15,6 @@ from db_manager import DBManager # <-- 新增: 引入資料庫管理器
 # -------------------------
 # 函式 _fetch_station 保持不變，因為它只負責網路抓取，不涉及 JSON 讀寫。
 def _fetch_station(sno):
-    # ... (程式碼不變)
     url = f"https://apis.youbike.com.tw/api/front/bike/lists?station_no={sno}"
     headers = {"User-Agent": "Mozilla/5.0"}
     try:
@@ -50,22 +49,17 @@ def get_all_bike_threaded(official_stations, max_workers=10):
             )
             time.sleep(random.uniform(0.3, 1.0))  # 控制速率，避免被封鎖(顯然沒什麼用)
 
-    # ⚠️ 移除存成單一 JSON 的程式碼
     end_time = time.time()
     elapsed = end_time - start_time
     print(f"執行時間: {elapsed:.4f} 秒")
     print(f"完成！所有站點資料已擷取到記憶體中，數量: {len(all_results)}")
-    
     # 回傳擷取到的結果，以便上層呼叫者 (如 run 函式) 處理或寫入 DB
     return all_results
-
-
 # -------------------------
 # 計算兩點距離 (公尺)
 # -------------------------
 # 函式 haversine 保持不變
 def haversine(lat1, lon1, lat2, lon2):
-    # ... (程式碼不變)
     R = 6371000  # 地球半徑 (公尺)
     dlat = radians(lat2 - lat1)
     dlon = radians(lon2 - lon1)
@@ -103,40 +97,20 @@ def save_official_youbike(db_manager: DBManager):
         return [], None
         
 def load_official_youbike(db_manager: DBManager):
-    """
-    ⚠️ 移除從本地 JSON 載入的程式碼
-    由於官方站點列表（靜態資料）應該在程式啟動時載入，
-    我們假設這裡改為從資料庫中讀取最後一次成功抓取的快照來獲取站點列表。
-    但更簡單的方式是直接呼叫 save_official_youbike 重新抓取一次。
-    為了符合原邏輯，這裡直接回傳空列表，並建議重新設計靜態站點資料的儲存。
-    """
-    # 這裡直接呼叫 save_official_youbike 重新抓取最新資料
     print("載入官方資料函式被呼叫，重新抓取最新官方站點列表...")
-    # 由於這裡沒有 DBManager 實例，且該函式並非 Youbike_API 類別方法，
-    # 且 run2/run 函式未傳遞 DBManager，我們將其視為舊功能，直接返回空列表/None。
-    # 更好的做法是移除 run2/run 和 load/save 這些全局函式。
-    # 這裡為保持檔案結構不變，將其指向重新抓取:
     return save_official_youbike(db_manager) 
 
 # -------------------------
 # 抓自訂圓心範圍站點 (不涉及 JSON 讀寫，保持不變)
 # -------------------------
 def get_youbike_stations():
-    # ... (程式碼不變)
-    # ... 
     return list(all_stations.values())
 
 
 def get_all_bike(official_stations):
     """單執行緒版本，修改為不存 JSON"""
-    # ... (網路抓取邏輯不變)
     station_nos = [item.get("sno") for item in official_stations]
     all_results = {}
-    
-    # ... (抓取迴圈邏輯不變)
-
-    # ⚠️ 移除存成單一 JSON 的程式碼
-    
     print(f"\n完成！所有站點已擷取到記憶體中，數量: {len(all_results)}")
     return all_results
 
@@ -184,12 +158,6 @@ class Youbike_API:
 
             # 轉換格式，得到 {"timestamp": "...", "stations": [...]}
             converted = self._convert_youbike_full(raw_json)
-
-            # ⚠️ 移除存原始 JSON 的程式碼
-            # date_str = raw_json["data"]["data"]["updated_at"].replace(" ", "_")
-            # dataset_path = os.path.join(self.DATASET_FOLDER, f"{date_str}.json")
-            # with open(dataset_path, "w", encoding="utf-8") as f:
-            #     json.dump(converted, f, ensure_ascii=False, indent=2)
 
             # 寫入 MySQL 資料庫
             unix_timestamp = self.db_manager.save_snapshot(converted)
@@ -242,45 +210,28 @@ class Youbike_API:
         return self._convert_youbike_full(raw_json)
 
 
-# -------------------------
-# run, run2 函式 (修改：移除 JSON 讀寫依賴，保持運算邏輯)
-# -------------------------
-# 這些函式現在需要 DBManager 實例
-# 由於它們是全局函式且沒有 DBManager，這裡先暫時假設一個 DB_MANAGER 實例
-# 實際應用中，建議將這些邏輯移入 Youbike_API 類別。
-# 這裡為了保持舊結構不變，我將傳入一個假的 DBManager 實例
+
 if __name__ == "__main__":
     # 假設 DB_CONFIG 已在某處定義
     DB_CONFIG_STANDALONE = {
-        "user": "root",
-        "password": "your_mysql_password", 
-        "host": "127.0.0.1",
-        "database": "youbike_data",
+        "user": "USER",
+        "password": "PASSWORD", 
+        "host": "IPADDRESS",
+        "database": "DATABASE",
     }
-    # 只有在作為獨立檔案執行時才創建這個假的 DBManager
-    # 否則 app.py 會傳入它自己的 DBManager
+
     DB_MANAGER_STANDALONE = DBManager(DB_CONFIG_STANDALONE) 
 
 def run2():
     print(datetime.now())
-    # 移除 save_official_youbike/load_official_youbike 對 JSON 檔案的操作
     official_stations, _ = save_official_youbike(DB_MANAGER_STANDALONE) # 這裡重新抓取
-    
     local_stations = get_youbike_stations()
-    # 移除 filter_against_official 對 JSON 檔案的操作
     filtered_stations, _ = filter_against_official(local_stations, official_stations)
-    # 這裡沒有調用 get_all_bike_threaded，所以沒有後續寫入 DB 的動作
 
 def run():
     print(datetime.now())
-    # 移除 save_official_youbike/load_official_youbike 對 JSON 檔案的操作
     official_stations, _ = save_official_youbike(DB_MANAGER_STANDALONE) # 這裡重新抓取
-    
-    # get_all_bike_threaded 執行網路抓取並回傳結果
     bike_details = get_all_bike_threaded(official_stations)
-    # ⚠️ 注意：這裡的 bike_details 是一個字典，需要轉換後才能寫入 DB 
-    # 原始程式碼只是將其存成 Bike_dataset/Bike_{unix}.json，並沒有寫入主要的 data_snapshots。
-    # 為了保持原邏輯，我們只移除 JSON 寫入，讓這個結果被丟棄。
 
 # -------------------------
 # 主程式
