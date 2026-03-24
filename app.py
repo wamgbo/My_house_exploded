@@ -1,23 +1,20 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import json # 保持 json 引入，因為 API 回傳格式仍是 JSON
+import json 
 import os
 import logging
 from logging.handlers import RotatingFileHandler
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
-# 假設我們將資料庫相關操作集中到這兩個模組中
 from analyzer import Analyzer 
 from api import Youbike_API 
-from db_manager import DBManager # <-- 新增：資料庫操作管理器
+from db_manager import DBManager
 from threading import Thread
 from functools import wraps
 import jwt
 
 # -------------------------
-# 資料庫連線配置 (假設放在 db_config.py)
-# 為了單一檔案展示，我將其暫時放在這裡，實際應用中建議獨立檔案
-
+# 資料庫連線配置 
 DB_CONFIG = {
     "user": "USER_NAME",
     "password": "PASSWORD",
@@ -77,8 +74,6 @@ app = Flask(__name__)
 CORS(app)
 
 YOUBIKE_API = "https://api.kcg.gov.tw:443/api/service/Get/b4dd9c40-9027-4125-8666-06bef1756092"
-
-# 移除 DATASET_FOLDER 和 os.makedirs
 
 # 創建資料庫管理器實例
 db_manager = DBManager(DB_CONFIG)
